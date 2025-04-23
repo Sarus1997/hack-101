@@ -11,3 +11,4 @@ def process_packet(packet):
         print(f"Packet from {packet[IP_TOS].src} to {packet[IP_TTL].dst} detected!")
 
 sniff_packets("en0") 
+ 
