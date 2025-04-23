@@ -8,5 +8,5 @@ def scan_port(ip, port):
         print(f"Port {port} is open on {ip}")
     else:
         print(f"Port {port} is closed on {ip}")
-    
-scan_port("192.168.0.1", 80)
+
+scan_port("192.168.20.194", 80)
