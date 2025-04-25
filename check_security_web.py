@@ -26,6 +26,7 @@ def fallback_curl_request(url, required_headers):
 # ฟังก์ชันหลักสำหรับตรวจสอบ Security Headers
 def check_security_web(url):
     required_headers = [
+        # Core security headers
         "X-Frame-Options",
         "X-XSS-Protection",
         "Content-Security-Policy",
@@ -35,7 +36,18 @@ def check_security_web(url):
         "Permissions-Policy",
         "Cross-Origin-Resource-Policy",
         "Cross-Origin-Opener-Policy",
-        "Cross-Origin-Embedder-Policy"
+        "Cross-Origin-Embedder-Policy",
+
+        # Additional useful headers
+        "Access-Control-Allow-Origin",
+        "Cache-Control",
+        "Pragma",
+        "Expires",
+        "Content-Disposition",
+
+        # Server info (should be hidden or removed)
+        "Server",
+        "X-Powered-By"
     ]
 
     try:
@@ -45,9 +57,29 @@ def check_security_web(url):
 
         for header in required_headers:
             if header in headers:
-                print(f"✅ {header}: Found")
+                if header in ["Server", "X-Powered-By"]:
+                    print(f"⚠️  {header}: Found → Consider removing or obfuscating this")
+                else:
+                    print(f"✅ {header}: Found")
             else:
-                print(f"❌ {header}: Not Found")
+                if header in ["Server", "X-Powered-By"]:
+                    print(f"✅ {header}: Not Found → Good (Information not exposed)")
+                else:
+                    print(f"❌ {header}: Not Found")
+
+        # เช็ค Set-Cookie แยก (เพราะเป็น list และมี attribute หลายค่า)
+        cookies = response.headers.get("Set-Cookie")
+        if cookies:
+            print("\n🍪 Set-Cookie:")
+            secure = "Secure" in cookies
+            httponly = "HttpOnly" in cookies
+            samesite = "SameSite" in cookies
+
+            print(f"   {'✅' if secure else '❌'} Secure")
+            print(f"   {'✅' if httponly else '❌'} HttpOnly")
+            print(f"   {'✅' if samesite else '❌'} SameSite")
+        else:
+            print("\n🍪 Set-Cookie: Not Found")
 
     except (requests.exceptions.SSLError, requests.exceptions.ReadTimeout) as err:
         print(f"\n⚠ Connection issue with {url}: {err}")
@@ -58,6 +90,4 @@ def check_security_web(url):
 
 # ✅ ตัวอย่างการใช้งาน
 if __name__ == "__main__":
-    check_security_web("https://www.mongodb.com/")
-    # สามารถเพิ่ม URL อื่นๆ ตรวจสอบต่อได้เลย
-    # check_security_web("https://github.com")
+    check_security_web("https://chatgpt.com/")  # เปลี่ยน URL ตามต้องการ
